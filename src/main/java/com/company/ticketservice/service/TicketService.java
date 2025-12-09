@@ -1,54 +1,82 @@
 package com.company.ticketservice.service;
 
+import com.company.ticketservice.dto.TicketCreateRequest;
+import com.company.ticketservice.dto.TicketResponse;
+import com.company.ticketservice.dto.TicketSearchCondition;
 import com.company.ticketservice.entity.Ticket;
+import com.company.ticketservice.entity.TicketStatus;
 import com.company.ticketservice.repository.TicketRepository;
+import com.company.ticketservice.repository.TicketSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service // 이 클래스가 Service 레이어임을 스프링에 알림
-@RequiredArgsConstructor // final 필드 자동 생성자 주입 (DI)
-@Transactional(readOnly = true) // 기본은 읽기-only 트랜잭션
+@Service
+@RequiredArgsConstructor
 public class TicketService {
 
     private final TicketRepository ticketRepository;
 
     /**
-     * 티켓 생성 (등록)
-     * - 트랜잭션 안에서 DB에 INSERT 수행
+     *  티켓 생성
+     * - DTO → 엔티티 변환
+     * - 기본 상태값 처리
+     * - DB 저장
+     * - Response DTO 반환
      */
-    @Transactional // 쓰기 작업이므로 readOnly 끔
-    public Ticket createTicket(Ticket ticket) {
-        // 여기서 나중에 검증 로직(가격 0원 이상인지 등)도 추가할 수 있음
-        return ticketRepository.save(ticket);
+    public TicketResponse createTicket(TicketCreateRequest request) {
+
+        // ticketStatus가 안 들어오면 기본값 AVAILABLE 적용
+        TicketStatus status = request.getTicketStatus() != null
+                ? request.getTicketStatus()
+                : TicketStatus.AVAILABLE;
+
+        Ticket ticket = Ticket.builder()
+                .eventName(request.getEventName())
+                .eventDate(request.getEventDate())
+                .eventLocation(request.getEventLocation())
+                .ownerId(request.getOwnerId())
+                .ticketStatus(status)
+                .originalPrice(request.getOriginalPrice())
+                .sellingPrice(request.getSellingPrice())
+                .seatInfo(request.getSeatInfo())
+                .ticketType(request.getTicketType())
+                .build();
+
+        Ticket saved = ticketRepository.save(ticket);
+
+        return TicketResponse.fromEntity(saved);
     }
 
     /**
-     * 티켓 단건 조회
-     * - id로 티켓을 찾고, 없으면 예외 발생
+     *  티켓 검색
      */
-    public Ticket getTicket(Long ticketId) {
-        return ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new IllegalArgumentException("Ticket not found. id=" + ticketId));
+    public List<TicketResponse> searchTickets(TicketSearchCondition condition) {
+
+        List<Ticket> tickets = ticketRepository.findAll(
+                TicketSpecification.fromCondition(condition)
+        );
+
+        return tickets.stream()
+                .map(TicketResponse::fromEntity)
+                .toList();
     }
 
     /**
-     * 전체 티켓 목록 조회
+     *  판매자 본인 티켓만 조회
+     * - Controller에서 ownerId만 받았을 때 사용 가능
      */
-    public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
-    }
+    public List<TicketResponse> searchSellerTickets(Long ownerId) {
+        TicketSearchCondition condition = new TicketSearchCondition();
+        condition.setOwnerId(ownerId);
 
-    /**
-     * 티켓 삭제
-     */
-    @Transactional
-    public void deleteTicket(Long ticketId) {
-        if (!ticketRepository.existsById(ticketId)) {
-            throw new IllegalArgumentException("Ticket not found. id=" + ticketId);
-        }
-        ticketRepository.deleteById(ticketId);
+        List<Ticket> tickets = ticketRepository.findAll(
+                TicketSpecification.fromCondition(condition)
+        );
+
+        return tickets.stream()
+                .map(TicketResponse::fromEntity)
+                .toList();
     }
 }
