@@ -53,24 +53,11 @@ public class Ticket {
     private String ticketType;
 
     // 타임스탬프
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", insertable = false,  updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at" , insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
-    // 자동 날짜 기록
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        if (this.ticketStatus == null) {
-            this.ticketStatus = TicketStatus.AVAILABLE; // DB Default와 맞춤
-        }
-    }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
