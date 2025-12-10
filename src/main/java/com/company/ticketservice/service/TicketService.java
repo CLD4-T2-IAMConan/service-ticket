@@ -37,7 +37,7 @@ public class TicketService {
                 .eventDate(request.getEventDate())
                 .eventLocation(request.getEventLocation())
                 .ownerId(request.getOwnerId())
-                .ticketStatus(status)
+                .ticketStatus(TicketStatus.AVAILABLE)
                 .originalPrice(request.getOriginalPrice())
                 .sellingPrice(request.getSellingPrice())
                 .seatInfo(request.getSeatInfo())
