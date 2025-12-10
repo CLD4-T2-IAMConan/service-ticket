@@ -1,5 +1,6 @@
 package com.company.ticketservice.controller;
 
+import com.company.ticketservice.dto.ApiResponse;
 import com.company.ticketservice.dto.TicketCreateRequest;
 import com.company.ticketservice.dto.TicketResponse;
 import com.company.ticketservice.dto.TicketSearchCondition;
@@ -22,8 +23,9 @@ public class TicketController {
      *   - 판매자가 티켓을 등록
      */
     @PostMapping("/sellers/tickets")
-    public TicketResponse createTicket(@RequestBody TicketCreateRequest request) {
-        return ticketService.createTicket(request);
+    public ApiResponse<TicketResponse> createTicket(@RequestBody TicketCreateRequest request) {
+        TicketResponse response = ticketService.createTicket(request);
+        return ApiResponse.success(response);
     }
 
     /**
@@ -32,8 +34,9 @@ public class TicketController {
      *   - 사용자 누구나 조회 가능
      */
     @GetMapping("/tickets")
-    public List<TicketResponse> getTickets(TicketSearchCondition condition) {
-        return ticketService.searchTickets(condition);
+    public ApiResponse<List<TicketResponse>> getTickets(TicketSearchCondition condition) {
+        List<TicketResponse> responses = ticketService.searchTickets(condition);
+        return ApiResponse.success(responses);
     }
 
     /**
@@ -41,7 +44,8 @@ public class TicketController {
      *   - URL: /sellers/tickets?ownerId=1
      */
     @GetMapping("/sellers/tickets")
-    public List<TicketResponse> getSellerTickets(@RequestParam Long ownerId) {
-        return ticketService.searchSellerTickets(ownerId);
+    public ApiResponse<List<TicketResponse>> getSellerTickets(@RequestParam Long ownerId) {
+        List<TicketResponse> responses = ticketService.searchSellerTickets(ownerId);
+        return ApiResponse.success(responses);
     }
 }
