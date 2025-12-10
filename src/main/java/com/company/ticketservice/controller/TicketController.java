@@ -22,7 +22,7 @@ public class TicketController {
      *   - 판매자가 티켓을 등록
      */
     @PostMapping("/sellers/tickets")
-    public TicketResponse createTicket(@ModelAttribute TicketCreateRequest request) {
+    public TicketResponse createTicket(@RequestBody TicketCreateRequest request) {
         return ticketService.createTicket(request);
     }
 
