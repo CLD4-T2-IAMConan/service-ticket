@@ -3,6 +3,7 @@ package com.company.ticketservice.service;
 import com.company.ticketservice.dto.TicketCreateRequest;
 import com.company.ticketservice.dto.TicketResponse;
 import com.company.ticketservice.dto.TicketSearchCondition;
+import com.company.ticketservice.dto.TicketUpdateRequest;
 import com.company.ticketservice.entity.Ticket;
 import com.company.ticketservice.entity.TicketStatus;
 import com.company.ticketservice.exception.BadRequestException;
@@ -15,12 +16,14 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final AuthService authService;
 
     /**
      *  티켓 생성
@@ -137,4 +140,98 @@ public class TicketService {
                 .map(TicketResponse::fromEntity)
                 .toList();
     }
+
+    /**
+     *  티켓 수정
+     */
+    public TicketResponse updateTicket(Long ticketId, TicketUpdateRequest request) {
+
+        // 1. 티켓 존재 여부 확인
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException("해당 티켓을 찾을 수 없습니다."));
+
+        // 2. 로그인 사용자 ID 가져오기
+        Long currentUserId = authService.getCurrentUserId();
+
+        // 3. 소유자 검증
+        if (!Objects.equals(ticket.getOwnerId(), currentUserId)) {
+            throw new BadRequestException("본인이 등록한 티켓만 수정할 수 있습니다.");
+        }
+
+        // 4. 거래 중 상태 확인 (RESERVED or SOLD이면 수정 불가)
+        if (ticket.getTicketStatus() == TicketStatus.RESERVED ||
+                ticket.getTicketStatus() == TicketStatus.SOLD) {
+            throw new BadRequestException("거래 중인 티켓은 수정할 수 없습니다.");
+        }
+
+        // 5. null이 아닌 필드만 업데이트
+        if (request.getEventName() != null) {
+            ticket.setEventName(request.getEventName());
+        }
+
+        if (request.getEventDate() != null) {
+            ticket.setEventDate(request.getEventDate());
+        }
+
+        if (request.getEventLocation() != null) {
+            ticket.setEventLocation(request.getEventLocation());
+        }
+
+        if (request.getOriginalPrice() != null) {
+            ticket.setOriginalPrice(request.getOriginalPrice());
+        }
+
+        if (request.getSellingPrice() != null) {
+            ticket.setSellingPrice(request.getSellingPrice());
+        }
+
+        if (request.getSeatInfo() != null) {
+            ticket.setSeatInfo(request.getSeatInfo());
+        }
+
+        if (request.getTicketType() != null) {
+            ticket.setTicketType(request.getTicketType());
+        }
+
+        // 6. 업데이트된 내용 저장
+        Ticket updatedTicket = ticketRepository.save(ticket);
+
+        // 7. Response DTO로 변환하여 반환
+        return TicketResponse.fromEntity(updatedTicket);
+    }
+
+
+    /**
+     *  티켓 삭제
+     */
+    public void deleteTicket(Long ticketId) {
+
+        // 1. 티켓 존재 여부 확인
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException("해당 티켓을 찾을 수 없습니다."));
+
+        // 2. 로그인 사용자 ID 가져오기
+        Long currentUserId = authService.getCurrentUserId();
+
+        // 3. 소유자 검증
+        if (!Objects.equals(ticket.getOwnerId(), currentUserId)) {
+            throw new BadRequestException("본인이 등록한 티켓만 삭제할 수 있습니다.");
+        }
+
+        // 4. 거래 중이면 삭제 불가
+        if (ticket.getTicketStatus() == TicketStatus.RESERVED ||
+                ticket.getTicketStatus() == TicketStatus.SOLD) {
+            throw new BadRequestException("거래 중인 티켓은 삭제할 수 없습니다.");
+        }
+
+        // 5. 삭제 수행
+        ticketRepository.delete(ticket);
+    }
+
+
+
+
+
+
+
 }
