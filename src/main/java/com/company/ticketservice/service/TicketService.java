@@ -164,6 +164,9 @@ public class TicketService {
             throw new BadRequestException("거래 중인 티켓은 수정할 수 없습니다.");
         }
 
+        // 수정 시 값 유효성 검증
+        validateUpdateRequest(request, ticket);
+
         // 5. null이 아닌 필드만 업데이트
         if (request.getEventName() != null) {
             ticket.setEventName(request.getEventName());
@@ -200,6 +203,37 @@ public class TicketService {
         return TicketResponse.fromEntity(updatedTicket);
     }
 
+    // 티켓 수정 시 검증 로직
+    private void validateUpdateRequest(TicketUpdateRequest request, Ticket ticket) {
+
+        // 날짜 검증
+        if (request.getEventDate() != null &&
+                request.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("공연 날짜는 현재 시점 이후여야 합니다.");
+        }
+
+        // 가격 검증
+        if (request.getOriginalPrice() != null &&
+                request.getOriginalPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("원래 가격은 0보다 커야 합니다.");
+        }
+
+        if (request.getSellingPrice() != null) {
+
+            if (request.getSellingPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new BadRequestException("판매 가격은 0보다 커야 합니다.");
+            }
+
+            // originalPrice는 수정 중일 수도 있고 아닐 수도 있음
+            BigDecimal baseOriginalPrice = request.getOriginalPrice() != null
+                    ? request.getOriginalPrice()
+                    : ticket.getOriginalPrice();
+
+            if (request.getSellingPrice().compareTo(baseOriginalPrice) > 0) {
+                throw new BadRequestException("판매 가격은 원래 가격을 초과할 수 없습니다.");
+            }
+        }
+    }
 
     /**
      *  티켓 삭제
