@@ -4,6 +4,7 @@ import com.company.ticketservice.dto.*;
 import com.company.ticketservice.service.AuthService;
 import com.company.ticketservice.service.TicketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +21,17 @@ public class TicketController {
      *  [POST] 티켓 등록
      *   - URL: /sellers/tickets
      *   - 판매자가 티켓을 등록
+     *   - multipart/form-data (이미지 포함)
      */
-    @PostMapping("/sellers/tickets")
-    public ApiResponse<TicketResponse> createTicket(@RequestBody TicketCreateRequest request) {
+    @PostMapping(
+            value = "/sellers/tickets",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ApiResponse<TicketResponse> createTicket(@ModelAttribute TicketCreateRequest request) {
+
+        // 로그인 붙일 때 여기에서 ownerId 넣어주는 방식이 가장 안전함
+        request.setOwnerId(authService.getCurrentUserId());
+
         TicketResponse response = ticketService.createTicket(request);
         return ApiResponse.success(response);
     }
@@ -55,11 +64,15 @@ public class TicketController {
      * [PUT] 티켓 수정
      * - URL: /sellers/tickets/{ticketId}
      * - 판매자 본인이 등록한 티켓 수정
+     * - multipart/form-data (이미지 포함)
      */
-    @PutMapping("/sellers/tickets/{ticketId}")
+    @PutMapping(
+            value = "/sellers/tickets/{ticketId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ApiResponse<TicketResponse> updateTicket(
             @PathVariable Long ticketId,
-            @RequestBody TicketUpdateRequest request
+            @ModelAttribute TicketUpdateRequest request
     ) {
         TicketResponse response = ticketService.updateTicket(ticketId, request);
         return ApiResponse.success(response);
