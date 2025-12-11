@@ -26,4 +26,7 @@ public class TicketSearchCondition {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime endDate;     // 이 날짜 이전
+
+    private Long categoryId;
+
 }

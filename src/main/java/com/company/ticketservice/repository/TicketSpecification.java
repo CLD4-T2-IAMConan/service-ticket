@@ -16,7 +16,8 @@ public class TicketSpecification {
                 .and(hasStatus(cond.getTicketStatus()))
                 .and(hasOwnerId(cond.getOwnerId()))
                 .and(eventDateAfterOrEqual(cond.getStartDate()))
-                .and(eventDateBeforeOrEqual(cond.getEndDate()));
+                .and(eventDateBeforeOrEqual(cond.getEndDate()))
+                .and(hasCategoryId(cond.getCategoryId()));
     }
 
     // ========== 개별 조건들 ==========
@@ -65,4 +66,13 @@ public class TicketSpecification {
             return cb.lessThanOrEqualTo(root.get("eventDate"), end);
         };
     }
+    private static Specification<Ticket> hasCategoryId(Long categoryId) {
+        return (root, query, cb) -> {
+            if (categoryId == null) {
+                return null;
+            }
+            return cb.equal(root.get("categoryId"), categoryId);
+        };
+    }
+
 }
