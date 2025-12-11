@@ -3,6 +3,7 @@ package com.company.ticketservice.controller;
 import com.company.ticketservice.dto.*;
 import com.company.ticketservice.service.AuthService;
 import com.company.ticketservice.service.TicketService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class TicketController {
             value = "/sellers/tickets",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ApiResponse<TicketResponse> createTicket(@ModelAttribute TicketCreateRequest request) {
+    public ApiResponse<TicketResponse> createTicket(@Valid @ModelAttribute TicketCreateRequest request) {
 
         // 로그인 붙일 때 여기에서 ownerId 넣어주는 방식이 가장 안전함
         request.setOwnerId(authService.getCurrentUserId());
@@ -72,7 +73,7 @@ public class TicketController {
     )
     public ApiResponse<TicketResponse> updateTicket(
             @PathVariable Long ticketId,
-            @ModelAttribute TicketUpdateRequest request
+            @Valid @ModelAttribute TicketUpdateRequest request
     ) {
         TicketResponse response = ticketService.updateTicket(ticketId, request);
         return ApiResponse.success(response);

@@ -64,7 +64,7 @@ public class Ticket {
     private String image2;
 
     // 상세 설명 (TEXT)
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT", nullable = true)
     private String description;
 
     // 거래 방식 ENUM

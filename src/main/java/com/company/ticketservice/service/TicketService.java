@@ -212,8 +212,8 @@ public class TicketService {
         // 수정 시 값 유효성 검증
         validateUpdateRequest(request, ticket);
 
-        // 5. null이 아닌 필드만 업데이트
-        if (request.getEventName() != null) {
+        // 5. null 또는 빈 값이 아닌 경우만 업데이트
+        if (request.getEventName() != null && !request.getEventName().isBlank()) {
             ticket.setEventName(request.getEventName());
         }
 
