@@ -12,11 +12,15 @@ import com.company.ticketservice.repository.TicketRepository;
 import com.company.ticketservice.repository.TicketSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,8 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final AuthService authService;
+
+    private static final String UPLOAD_DIR = "uploads/"; // 로컬 이미지 저장 경로
 
     /**
      *  티켓 생성
@@ -34,6 +40,10 @@ public class TicketService {
      */
     public TicketResponse createTicket(TicketCreateRequest request) {
         validateCreateRequest(request);
+
+        // 이미지 저장 처리
+        String savedImage1 = saveImageFile(request.getImage1());
+        String savedImage2 = saveImageFile(request.getImage2());
 
 
         Ticket ticket = Ticket.builder()
@@ -46,11 +56,37 @@ public class TicketService {
                 .sellingPrice(request.getSellingPrice())
                 .seatInfo(request.getSeatInfo())
                 .ticketType(request.getTicketType())
+                .categoryId(request.getCategoryId())
+                .image1(savedImage1)
+                .image2(savedImage2)
+                .description(request.getDescription())
+                .tradeType(request.getTradeType())
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
 
         return TicketResponse.fromEntity(saved);
+    }
+
+    /**
+     * 이미지 파일 저장 (로컬)
+     */
+    private String saveImageFile(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            return null;
+        }
+        try {
+            File dir = new File(UPLOAD_DIR);
+            if (!dir.exists()) dir.mkdirs();
+
+            String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+            File file = new File(dir, fileName);
+            imageFile.transferTo(file);
+
+            return fileName; // DB에는 파일명만 저장
+        } catch (IOException e) {
+            throw new BadRequestException("이미지 저장 중 오류가 발생했습니다.");
+        }
     }
 
     /**
@@ -74,6 +110,15 @@ public class TicketService {
         if (request.getOriginalPrice() == null) {
             throw new BadRequestException("원래 가격은 필수 입력값입니다.");
         }
+
+        if (request.getCategoryId() == null) {
+            throw new BadRequestException("카테고리는 필수 입력값입니다.");
+        }
+
+        if (request.getTradeType() == null) {
+            throw new BadRequestException("거래 방식은 필수 입력값입니다.");
+        }
+
 
         // 2) 공연 날짜가 현재 시점보다 이전인지 체크
         if (request.getEventDate().isBefore(LocalDateTime.now())) {
@@ -196,6 +241,21 @@ public class TicketService {
             ticket.setTicketType(request.getTicketType());
         }
 
+        if (request.getCategoryId() != null) ticket.setCategoryId(request.getCategoryId());
+
+        if (request.getDescription() != null) ticket.setDescription(request.getDescription());
+
+        if (request.getTradeType() != null) ticket.setTradeType(request.getTradeType());
+
+        if (request.getImage1() != null && !request.getImage1().isEmpty()) {
+            ticket.setImage1(saveImageFile(request.getImage1()));
+        }
+        if (request.getImage2() != null && !request.getImage2().isEmpty()) {
+            ticket.setImage2(saveImageFile(request.getImage2()));
+        }
+
+
+
         // 6. 업데이트된 내용 저장
         Ticket updatedTicket = ticketRepository.save(ticket);
 
@@ -233,6 +293,11 @@ public class TicketService {
                 throw new BadRequestException("판매 가격은 원래 가격을 초과할 수 없습니다.");
             }
         }
+
+        if (request.getCategoryId() != null && request.getCategoryId() <= 0) {
+            throw new BadRequestException("카테고리 ID는 0보다 큰 값이어야 합니다.");
+        }
+
     }
 
     /**
