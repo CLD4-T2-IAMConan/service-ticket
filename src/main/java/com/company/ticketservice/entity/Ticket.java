@@ -52,6 +52,29 @@ public class Ticket {
     @Column(name = "ticket_type")
     private String ticketType;
 
+    // 카테고리 ID (FK)
+    @Column(name = "category_id", nullable = false)
+    private Long categoryId;
+
+    // 이미지 (선택 사항)
+    @Column(name = "image1")
+    private String image1;
+
+    @Column(name = "image2")
+    private String image2;
+
+    // 상세 설명 (TEXT)
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    // 거래 방식 ENUM
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trade_type", nullable = false)
+    private TradeType tradeType;
+
+
+
+
     // 타임스탬프
     @Column(name = "created_at", insertable = false,  updatable = false)
     private LocalDateTime createdAt;
