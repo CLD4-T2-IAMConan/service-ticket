@@ -2,6 +2,7 @@ package com.company.ticketservice.dto;
 
 import com.company.ticketservice.entity.Ticket;
 import com.company.ticketservice.entity.TicketStatus;
+import com.company.ticketservice.entity.TradeType;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -29,8 +30,15 @@ public class TicketResponse {
     private String seatInfo;
     private String ticketType;
 
-    // 이미지 URL (DB에 컬럼 추가되면 연결)
-    private String imageUrl;
+    private Long categoryId;
+
+    private String image1;
+    private String image2;
+
+    private String description;
+
+    private TradeType tradeType;
+
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -48,8 +56,11 @@ public class TicketResponse {
                 .sellingPrice(ticket.getSellingPrice())
                 .seatInfo(ticket.getSeatInfo())
                 .ticketType(ticket.getTicketType())
-                // imageUrl은 아직 엔티티에 없으니 일단 null 처리 or 나중에 추가
-                .imageUrl(null)
+                .categoryId(ticket.getCategoryId())
+                .image1(ticket.getImage1())
+                .image2(ticket.getImage2())
+                .description(ticket.getDescription())
+                .tradeType(ticket.getTradeType())
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
                 .build();

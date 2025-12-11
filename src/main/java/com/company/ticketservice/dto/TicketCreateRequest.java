@@ -1,6 +1,7 @@
 package com.company.ticketservice.dto;
 
 import com.company.ticketservice.entity.TicketStatus;
+import com.company.ticketservice.entity.TradeType;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +35,18 @@ public class TicketCreateRequest {
     private String seatInfo;
     private String ticketType;
 
+    // 카테고리
+    private Long categoryId;
+
+    // 상세 설명
+    private String description;
+
+    // 거래 방식
+    private TradeType tradeType;
+
     // 이미지 파일 (선택사항)
     // POST /sellers/tickets 에서 multipart/form-data로 받을 예정
-    private MultipartFile imageFile;
+    private MultipartFile image1;
+    private MultipartFile image2;
+
 }
