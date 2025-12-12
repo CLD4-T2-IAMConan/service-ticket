@@ -166,6 +166,20 @@ public class TicketService {
     }
 
     /**
+     * 티켓 상세 정보를 조회
+     * @param ticketId 조회할 티켓의 고유 ID
+     * @return 티켓 상세 응답 DTO
+     */
+    public TicketResponse getTicketDetail(Long ticketId) {
+        // 1. ID로 티켓 엔티티를 조회
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException("티켓 ID: " + ticketId + "에 해당하는 티켓을 찾을 수 없습니다."));
+
+        // 2. 엔티티를 Response DTO로 변환하여 반환
+        return TicketResponse.fromEntity(ticket);
+    }
+
+    /**
      *  판매자 본인 티켓만 조회
      * - Controller에서 ownerId만 받았을 때 사용 가능
      */

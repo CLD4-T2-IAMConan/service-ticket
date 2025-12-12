@@ -49,6 +49,20 @@ public class TicketController {
     }
 
     /**
+     * [GET] 티켓 상세 정보 조회
+     * - URL: /tickets/{ticketId}
+     * - 사용자 누구나 조회 가능
+     * @param ticketId URL 경로 변수 (ticketId)
+     * @return 200 OK와 함께 티켓 상세 정보 (JSON) 반환
+     */
+    @GetMapping("/tickets/{ticketId}")
+    public ApiResponse<TicketResponse> getTicketDetail(@PathVariable Long ticketId) {
+        // 티켓 ID를 사용하여 서비스 레이어에서 상세 정보를 조회합니다.
+        TicketResponse response = ticketService.getTicketDetail(ticketId);
+        return ApiResponse.success(response);
+    }
+
+    /**
      *  [GET] 등록 티켓 조회 (판매자 본인 티켓 조회)
      *   - URL: /sellers/tickets
      */
