@@ -10,9 +10,11 @@ import com.company.ticketservice.exception.BadRequestException;
 import com.company.ticketservice.exception.NotFoundException;
 import com.company.ticketservice.repository.TicketRepository;
 import com.company.ticketservice.repository.TicketSpecification;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -342,7 +344,71 @@ public class TicketService {
     }
 
 
+    @Transactional
+    public TicketResponse updateTicketStatus(Long ticketId, String newStatusString) {
 
+        // 1. Enum 파싱 및 유효성 검증
+        TicketStatus newStatus;
+        try {
+            // 입력받은 문자열을 Enum으로 변환
+            newStatus = TicketStatus.valueOf(newStatusString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 Enum 값일 경우 예외 발생 (Controller에서 400 처리)
+            throw new IllegalArgumentException("존재하지 않는 티켓 상태 값입니다: " + newStatusString);
+        }
+
+        // 2. 티켓 조회 (EntityNotFoundException 처리)
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("ID " + ticketId + "인 티켓을 찾을 수 없습니다."));
+
+        // 3. 비즈니스 상태 전이 규칙 검증 (핵심)
+        if (!canChangeStatus(ticket.getTicketStatus(), newStatus)) {
+            throw new IllegalStateException(
+                    String.format("현재 상태 (%s)에서는 %s 상태로 변경할 수 없습니다.",
+                            ticket.getTicketStatus(), newStatus)
+            );
+        }
+
+        // 4. 상태 변경 및 저장 (Dirty Checking)
+        ticket.setTicketStatus(newStatus);
+
+        // 5. 응답 DTO 반환
+        return TicketResponse.fromEntity(ticket); // 🚨 DTO 변환 메서드는 TicketResponse에 정의되어 있어야 합니다.
+    }
+
+    /**
+     * 상태 전이 규칙을 검증하는 내부 메서드
+     */
+    private boolean canChangeStatus(TicketStatus current, TicketStatus target) {
+        if (current == target) {
+            // 상태가 이미 목표 상태라면 변경할 필요 없음 (성공으로 간주)
+            return true;
+        }
+        // Case 1: AVAILABLE -> RESERVED (거래 요청 시작)
+        if (current == TicketStatus.AVAILABLE && target == TicketStatus.RESERVED) {
+            return true;
+        }
+        // Case 2: RESERVED -> AVAILABLE (거래 요청 취소/실패)
+        if (current == TicketStatus.RESERVED && target == TicketStatus.AVAILABLE) {
+            return true;
+        }
+        // Case 3: RESERVED -> SOLD (거래 최종 확정)
+        if (current == TicketStatus.RESERVED && target == TicketStatus.SOLD) {
+            return true;
+        }
+        // Case 4: AVAILABLE/RESERVED -> EXPIRED (관리자 취소 등)
+        if ((current == TicketStatus.AVAILABLE || current == TicketStatus.RESERVED) && target == TicketStatus.EXPIRED) {
+            return true;
+        }
+
+        // 이미 SOLD나 EXPIRED 상태는 변경 불가능하다고 가정
+        if (current == TicketStatus.SOLD || current == TicketStatus.EXPIRED) {
+            return false;
+        }
+
+        // 그 외 모든 전이는 불가능
+        return false;
+    }
 
 
 
