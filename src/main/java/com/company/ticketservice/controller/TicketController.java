@@ -128,7 +128,7 @@ public class TicketController {
             TicketResponse updatedTicket = ticketService.updateTicketStatus(ticketId, newStatus);
 
             // 2. 성공 시 200 OK와 함께 변경된 티켓 정보 반환
-            return ResponseEntity.ok(updatedTicket);
+            return ResponseEntity.ok(ApiResponse.success(updatedTicket)); // 🚨 ApiResponse.success() 사용
 
         } catch (IllegalArgumentException e) {
             // newStatus가 유효하지 않은 TicketStatus Enum 값일 경우
