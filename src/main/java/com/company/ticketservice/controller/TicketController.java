@@ -3,9 +3,11 @@ package com.company.ticketservice.controller;
 import com.company.ticketservice.dto.*;
 import com.company.ticketservice.service.AuthService;
 import com.company.ticketservice.service.TicketService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -105,6 +107,42 @@ public class TicketController {
     ) {
         ticketService.deleteTicket(ticketId);
         return ApiResponse.success(null);
+    }
+
+    /**
+     * [PUT] 특정 티켓의 상태를 지정된 새 상태로 변경합니다.
+     * URL: PUT /tickets/{ticketId}/status/{newStatus}
+     *
+     * @param ticketId 변경할 티켓의 ID
+     * @param newStatus 변경할 목표 상태 (예: RESERVED, SOLD, AVAILABLE, CANCELLED)
+     * @return 변경된 티켓의 응답 DTO (TicketResponse)
+     */
+    @PutMapping("/{ticketId}/status/{newStatus}")
+    public ResponseEntity<?> updateTicketStatus(
+            @PathVariable Long ticketId,
+            @PathVariable String newStatus
+    ) {
+        try {
+            // 1. 서비스에 상태 변경 요청을 위임
+            // 🚨 TicketService에 해당 메서드를 정의해야 합니다.
+            TicketResponse updatedTicket = ticketService.updateTicketStatus(ticketId, newStatus);
+
+            // 2. 성공 시 200 OK와 함께 변경된 티켓 정보 반환
+            return ResponseEntity.ok(updatedTicket);
+
+        } catch (IllegalArgumentException e) {
+            // newStatus가 유효하지 않은 TicketStatus Enum 값일 경우
+            return ResponseEntity.badRequest().body("유효하지 않은 티켓 상태: " + newStatus);
+        } catch (EntityNotFoundException e) {
+            // 티켓 ID를 찾을 수 없는 경우
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            // 현재 상태에서 목표 상태로 변경할 수 없는 경우 (예: 이미 SOLD인데 RESERVED로 변경 시도)
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            // 기타 서버 내부 오류
+            return ResponseEntity.internalServerError().body("티켓 상태 변경 중 서버 오류 발생.");
+        }
     }
 
 }
