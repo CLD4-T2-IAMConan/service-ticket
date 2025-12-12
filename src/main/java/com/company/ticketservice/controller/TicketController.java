@@ -117,7 +117,7 @@ public class TicketController {
      * @param newStatus 변경할 목표 상태 (예: RESERVED, SOLD, AVAILABLE, CANCELLED)
      * @return 변경된 티켓의 응답 DTO (TicketResponse)
      */
-    @PutMapping("/{ticketId}/status/{newStatus}")
+    @PutMapping("/tickets/{ticketId}/status/{newStatus}")
     public ResponseEntity<?> updateTicketStatus(
             @PathVariable Long ticketId,
             @PathVariable String newStatus
