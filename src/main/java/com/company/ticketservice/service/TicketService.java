@@ -402,7 +402,7 @@ public class TicketService {
         }
 
         // 이미 SOLD나 EXPIRED 상태는 변경 불가능하다고 가정
-        if (current == TicketStatus.SOLD || current == TicketStatus.EXPIRED) {
+        if (current == TicketStatus.EXPIRED) {
             return false;
         }
 
