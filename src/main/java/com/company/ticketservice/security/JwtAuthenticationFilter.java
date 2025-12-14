@@ -25,11 +25,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String token = resolveToken(request);
+        try {
+            String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            //  토큰이 있을 때만 검증
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                Authentication authentication =
+                        jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            }
+
+        } catch (Exception e) {
+            //  토큰 오류가 나도 permitAll API는 통과
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
