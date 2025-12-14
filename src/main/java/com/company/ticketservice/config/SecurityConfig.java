@@ -1,31 +1,52 @@
 package com.company.ticketservice.config;
 
+import com.company.ticketservice.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-                // CSRF 비활성화 (API 서버이므로)
-                .csrf(csrf -> csrf.disable())
+                // CSRF 비활성화 (JWT 기반)
+                .csrf(AbstractHttpConfigurer::disable)
 
-                // 인증/인가 설정
+                // 세션 사용 안 함 (Stateless)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // 인증 / 인가 정책
                 .authorizeHttpRequests(auth -> auth
-
-                        // 티켓 조회/검색/상세는 누구나 가능
+                        // 티켓 조회는 누구나 가능
                         .requestMatchers(HttpMethod.GET, "/api/tickets/**").permitAll()
 
-                        // 판매자 전용 API (등록/수정/삭제/내 티켓)
+                        // 판매자 전용 API (JWT 필수)
                         .requestMatchers("/api/sellers/**").authenticated()
 
-                        // 그 외 API는 인증 필요
+                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
+                )
+
+                // JWT 필터 적용
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();
