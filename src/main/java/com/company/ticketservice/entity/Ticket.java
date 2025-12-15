@@ -39,11 +39,12 @@ public class Ticket {
     private TicketStatus ticketStatus = TicketStatus.AVAILABLE;
 
     // 가격 정보
-    @Column(name = "original_price", nullable = false)
+    @Column(name = "original_price", nullable = false, precision = 10, scale = 0)
     private BigDecimal originalPrice;
 
-    @Column(name = "selling_price")
+    @Column(name = "selling_price", precision = 10, scale = 0)
     private BigDecimal sellingPrice;
+
 
     // 티켓 상세 정보
     @Column(name = "seat_info")
