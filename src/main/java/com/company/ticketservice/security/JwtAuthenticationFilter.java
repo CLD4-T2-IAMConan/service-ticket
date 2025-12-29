@@ -38,6 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             //  토큰 오류가 나도 permitAll API는 통과
+            // 로깅 추가 (디버깅용)
+            System.out.println("JWT 인증 실패: " + e.getMessage());
             SecurityContextHolder.clearContext();
         }
 

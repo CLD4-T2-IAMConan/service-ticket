@@ -3,6 +3,7 @@ package com.company.ticketservice.controller;
 import com.company.ticketservice.dto.*;
 import com.company.ticketservice.service.AuthService;
 import com.company.ticketservice.service.TicketService;
+import com.company.ticketservice.service.FavoriteService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class TicketController {
 
     private final TicketService ticketService;
     private final AuthService authService;
+    private final FavoriteService favoriteService;
 
     /**
      *  [POST] 티켓 등록
@@ -168,6 +170,37 @@ public class TicketController {
             e.printStackTrace();
             return ApiResponse.error("티켓 시드 데이터 추가 중 오류 발생: " + e.getMessage());
         }
+    }
+
+    /**
+     * [POST] 찜하기 추가/제거 (토글)
+     * - URL: /api/tickets/{ticketId}/favorite
+     * - 로그인 필요
+     */
+    @PostMapping("/tickets/{ticketId}/favorite")
+    public ApiResponse<Boolean> toggleFavorite(@PathVariable Long ticketId) {
+        try {
+            Long userId = authService.getCurrentUserId();
+            boolean isFavorite = favoriteService.toggleFavorite(userId, ticketId);
+            return ApiResponse.success(isFavorite);
+        } catch (IllegalStateException e) {
+            // 인증 실패 시 401 반환
+            return ApiResponse.error("인증이 필요합니다: " + e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.error("찜하기 처리 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * [GET] 찜하기 여부 확인
+     * - URL: /api/tickets/{ticketId}/favorite
+     * - 로그인 필요
+     */
+    @GetMapping("/tickets/{ticketId}/favorite")
+    public ApiResponse<Boolean> checkFavorite(@PathVariable Long ticketId) {
+        Long userId = authService.getCurrentUserId();
+        boolean isFavorite = favoriteService.isFavorite(userId, ticketId);
+        return ApiResponse.success(isFavorite);
     }
 
 }
