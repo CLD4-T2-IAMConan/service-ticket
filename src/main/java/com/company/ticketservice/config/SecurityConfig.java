@@ -41,6 +41,7 @@ public class SecurityConfig {
 
                         // 판매자 전용 API
                         .requestMatchers("/api/sellers/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status/*").permitAll()
 
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
