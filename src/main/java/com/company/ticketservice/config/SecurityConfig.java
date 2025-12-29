@@ -36,6 +36,9 @@ public class SecurityConfig {
                         //  CORS Preflight 허용 (중요)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // 관리자용 시드 데이터 API (개발용) - 가장 먼저 체크
+                        .requestMatchers("/api/admin/tickets/seed").permitAll()
+
                         //  티켓 조회는 누구나 가능
                         .requestMatchers(HttpMethod.GET, "/api/tickets/**").permitAll()
 

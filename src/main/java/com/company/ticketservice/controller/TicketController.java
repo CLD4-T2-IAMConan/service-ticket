@@ -40,16 +40,22 @@ public class TicketController {
         return ApiResponse.success(response);
     }
 
-    /**
-     *  [GET] 티켓 리스트 조회 및 필터링
-     *   - URL: /tickets
-     *   - 사용자 누구나 조회 가능
-     */
-    @GetMapping("/tickets")
-    public ApiResponse<List<TicketResponse>> getTickets(TicketSearchCondition condition) {
-        List<TicketResponse> responses = ticketService.searchTickets(condition);
-        return ApiResponse.success(responses);
-    }
+           /**
+            *  [GET] 티켓 리스트 조회 및 필터링 (페이지네이션 지원)
+            *   - URL: /tickets?page=0&size=20&eventName=검색어&ticketStatus=AVAILABLE&sortBy=eventDate&sortDirection=ASC
+            *   - 사용자 누구나 조회 가능
+            */
+           @GetMapping("/tickets")
+           public ApiResponse<PageResponse<TicketResponse>> getTickets(
+                   TicketSearchCondition condition,
+                   @RequestParam(defaultValue = "0") int page,
+                   @RequestParam(defaultValue = "20") int size,
+                   @RequestParam(required = false) String sortBy,
+                   @RequestParam(required = false) String sortDirection
+           ) {
+               PageResponse<TicketResponse> responses = ticketService.searchTickets(condition, page, size, sortBy, sortDirection);
+               return ApiResponse.success(responses);
+           }
 
     /**
      * [GET] 티켓 상세 정보 조회
@@ -142,6 +148,25 @@ public class TicketController {
         } catch (Exception e) {
             // 기타 서버 내부 오류
             return ResponseEntity.internalServerError().body("티켓 상태 변경 중 서버 오류 발생.");
+        }
+    }
+
+    /**
+     * [POST] 관리자용 - 티켓 시드 데이터 추가
+     * - URL: /api/admin/tickets/seed
+     * - 개발용: 인증 없이 사용 가능
+     */
+    @PostMapping("/admin/tickets/seed")
+    @CrossOrigin(origins = "*") // 개발용으로 모든 origin 허용
+    public ApiResponse<String> seedTickets() {
+        try {
+            // DataInitializer의 로직을 직접 호출
+            ticketService.seedTickets();
+            long count = ticketService.countAvailableFutureTickets();
+            return ApiResponse.success("티켓 시드 데이터가 성공적으로 추가되었습니다. 현재 미래 날짜 AVAILABLE 티켓: " + count + "개");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("티켓 시드 데이터 추가 중 오류 발생: " + e.getMessage());
         }
     }
 
