@@ -1,9 +1,8 @@
 package com.company.ticketservice.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -26,19 +25,33 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** JWT 유효성 검증 + 로그 */
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+
+        } catch (ExpiredJwtException e) {
+            // 만료 토큰
+            log.warn("[JWT] Expired token - exp: {}", e.getClaims().getExpiration());
+        } catch (UnsupportedJwtException e) {
+            log.warn("[JWT] Unsupported token");
+        } catch (MalformedJwtException e) {
+            log.warn("[JWT] Malformed token");
+        } catch (SecurityException e) {
+            log.warn("[JWT] Invalid signature");
+        } catch (IllegalArgumentException e) {
+            log.warn("[JWT] Empty or null token");
         }
+
+        return false;
     }
 
+    /** JWT → Authentication 변환 */
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
 
-        String userId = claims.getSubject();     // ⭐ account와 동일
+        Long userId = Long.parseLong(claims.getSubject()); // Account Service와 일치
         String role = claims.get("role", String.class);
 
         List<SimpleGrantedAuthority> authorities =
@@ -60,6 +73,4 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
 }
-

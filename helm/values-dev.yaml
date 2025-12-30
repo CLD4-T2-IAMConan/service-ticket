@@ -1,18 +1,27 @@
 replicaCount: 2
 image:
-  repository: ticketservice-service
+  repository: ghcr.io/cld4-t2-iamconan/service-ticket
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "main"
+imagePullSecrets:
+  - name: ghcr-pull-secret
 service:
   type: ClusterIP
   port: 80
   targetPort: 8080
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
+  enabled: true
+  className: alb
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/group.name: passit-dev-alb
+    alb.ingress.kubernetes.io/load-balancer-name: passit-dev-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
   hosts:
-    - host: ticketservice-service.local
+    - host: ticket-service.passit.com
       paths:
         - path: /
           pathType: Prefix
@@ -31,11 +40,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 database:
   enabled: true
-  host: "passit-dev-aurora-cluster.cluster-cnqmcq6uwqa3.ap-northeast-2.rds.amazonaws.com"
-  port: 5432
-  name: ticketservice_db
-  user: postgres
-  password: postgres
+  host: passit-dev-aurora-cluster.cluster-cnqmcq6uwqa3.ap-northeast-2.rds.amazonaws.com
+  port: 3306
+  name: passit_db
+  user: passit_user
+  password: passit_password
 env:
   SPRING_PROFILES_ACTIVE: "production"
 livenessProbe:
@@ -50,7 +59,11 @@ readinessProbe:
     port: 8080
   initialDelaySeconds: 20
   periodSeconds: 5
+# Valkey 설정 (ElastiCache for Valkey)
 redis:
   host: "passit-dev-valkey.q2tpkl.ng.0001.apn2.cache.amazonaws.com"
+  port: 6379
+  password: ""
+  ssl: true
 s3:
   bucket: "passit-dev-ticket-images-bucket"

@@ -23,17 +23,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                // CSRF 비활성화 (JWT)
+                // CSRF 비활성화 (JWT 기반)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 세션 사용 안 함
+                // 세션 미사용
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 // 인증 / 인가 정책
                 .authorizeHttpRequests(auth -> auth
-                        //  CORS Preflight 허용 (중요)
+
+                        // CORS Preflight 요청 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // 관리자용 시드 데이터 API (개발용) - 가장 먼저 체크
@@ -43,15 +44,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/tickets/*/favorite").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tickets/*/favorite").authenticated()
 
-                        //  티켓 조회는 누구나 가능 (GET 요청만)
+                        // 티켓 조회는 누구나 가능 (GET 요청만)
                         .requestMatchers(HttpMethod.GET, "/api/tickets/**").permitAll()
 
-                        // 판매자 전용 API
-                        .requestMatchers("/api/sellers/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status/*").permitAll()
+                        // 티켓 상태 변경 (로그인 필요)
+                        .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status/*").authenticated()
 
-                        // 나머지는 인증 필요
-                        .anyRequest().authenticated()
+                        // 판매자 전용 API (전부 로그인 필요)
+                        .requestMatchers("/api/sellers/**").authenticated()
+
+                        // 그 외 요청은 차단
+                        .anyRequest().denyAll()
                 )
 
                 // JWT 필터 적용
