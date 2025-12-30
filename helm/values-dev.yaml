@@ -1,8 +1,8 @@
 replicaCount: 2
 image:
   repository: ghcr.io/cld4-t2-iamconan/service-ticket
-  pullPolicy: IfNotPresent
-  tag: "main"
+  pullPolicy: Always
+  tag: "sha-a2366b4"
 imagePullSecrets:
   - name: ghcr-pull-secret
 service:
