@@ -199,10 +199,10 @@ public class TicketService {
         }
 
         // 거래 중 상태 확인
-        if (ticket.getTicketStatus() == TicketStatus.RESERVED ||
-                ticket.getTicketStatus() == TicketStatus.SOLD) {
-            throw new BadRequestException("거래 중인 티켓은 수정할 수 없습니다.");
+        if (!ticket.getTicketStatus().isUpdatable()) {
+            throw new BadRequestException("현재 상태에서는 티켓을 수정할 수 없습니다.");
         }
+
 
         validateUpdateRequest(request, ticket);
 
@@ -295,10 +295,10 @@ public class TicketService {
             throw new BadRequestException("본인이 등록한 티켓만 삭제할 수 있습니다.");
         }
 
-        if (ticket.getTicketStatus() == TicketStatus.RESERVED ||
-                ticket.getTicketStatus() == TicketStatus.SOLD) {
-            throw new BadRequestException("거래 중인 티켓은 삭제할 수 없습니다.");
+        if (!ticket.getTicketStatus().isDeletable()) {
+            throw new BadRequestException("현재 상태에서는 티켓을 삭제할 수 없습니다.");
         }
+
 
         ticketRepository.delete(ticket);
     }
@@ -327,28 +327,17 @@ public class TicketService {
             throw new BadRequestException("본인 티켓만 상태를 변경할 수 있습니다.");
         }
 
-        if (!canChangeStatus(ticket.getTicketStatus(), newStatus)) {
+        if (!ticket.getTicketStatus().canChangeTo(newStatus)) {
             throw new IllegalStateException(
                     String.format("현재 상태 (%s)에서는 %s 상태로 변경할 수 없습니다.",
                             ticket.getTicketStatus(), newStatus)
             );
         }
 
+
         ticket.setTicketStatus(newStatus);
         return TicketResponse.fromEntity(ticket);
     }
 
-    private boolean canChangeStatus(TicketStatus current, TicketStatus target) {
-        if (current == target) return true;
 
-        if (current == TicketStatus.AVAILABLE && target == TicketStatus.RESERVED) return true;
-        if (current == TicketStatus.RESERVED && target == TicketStatus.AVAILABLE) return true;
-        if (current == TicketStatus.RESERVED && target == TicketStatus.SOLD) return true;
-        if ((current == TicketStatus.AVAILABLE || current == TicketStatus.RESERVED) && target == TicketStatus.EXPIRED)
-            return true;
-
-        if (current == TicketStatus.EXPIRED) return false;
-
-        return false;
-    }
 }
