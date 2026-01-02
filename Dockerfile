@@ -3,6 +3,7 @@ FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle gradle
+COPY common common
 COPY src src
 RUN gradle build --no-daemon -x test
 
