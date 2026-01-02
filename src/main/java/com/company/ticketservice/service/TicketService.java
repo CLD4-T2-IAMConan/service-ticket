@@ -1,5 +1,7 @@
 package com.company.ticketservice.service;
 
+import com.company.sns.EventMessage;
+import com.company.sns.SnsEventPublisher;
 import com.company.ticketservice.dto.PageResponse;
 import com.company.ticketservice.dto.TicketCreateRequest;
 import com.company.ticketservice.dto.TicketResponse;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,6 +38,7 @@ import java.util.UUID;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final SnsEventPublisher eventPublisher;
 
     private static final String UPLOAD_DIR = "uploads/"; // 로컬 이미지 저장 경로
 
@@ -67,6 +71,24 @@ public class TicketService {
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
+
+        // 이벤트 발행: ticket.created
+        try {
+            EventMessage event = EventMessage.create(
+                "ticket.created",
+                "service-ticket",
+                Map.of(
+                    "ticketId", saved.getTicketId(),
+                    "ownerId", saved.getOwnerId(),
+                    "eventName", saved.getEventName(),
+                    "ticketStatus", saved.getTicketStatus().name()
+                )
+            );
+            eventPublisher.publishAsync("ticket-events", event);
+        } catch (Exception e) {
+            // 이벤트 발행 실패는 티켓 생성을 중단시키지 않음
+        }
+
         return TicketResponse.fromEntity(saved);
     }
 
@@ -637,7 +659,26 @@ public class TicketService {
         }
 
 
+        TicketStatus oldStatus = ticket.getTicketStatus();
         ticket.setTicketStatus(newStatus);
+
+        // 이벤트 발행: ticket.status.changed
+        try {
+            EventMessage event = EventMessage.create(
+                "ticket.status.changed",
+                "service-ticket",
+                Map.of(
+                    "ticketId", ticketId,
+                    "ownerId", ticket.getOwnerId(),
+                    "oldStatus", oldStatus.name(),
+                    "newStatus", newStatus.name()
+                )
+            );
+            eventPublisher.publishAsync("ticket-events", event);
+        } catch (Exception e) {
+            // 이벤트 발행 실패는 상태 변경을 중단시키지 않음
+        }
+
         return TicketResponse.fromEntity(ticket);
     }
 

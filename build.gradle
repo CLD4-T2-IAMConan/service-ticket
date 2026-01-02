@@ -45,6 +45,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'com.h2database:h2'
+
+    // SNS Event Library
+    implementation project(':common:sns-lib')
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.0.0'
 }
 
 tasks.named('test') {

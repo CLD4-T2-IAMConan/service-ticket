@@ -19,3 +19,13 @@ logging:
     com.company.ticketservice: DEBUG
     org.springframework: DEBUG
     org.hibernate.SQL: DEBUG
+
+# AWS Configuration
+aws:
+  region: ${AWS_REGION:ap-northeast-2}
+  sns:
+    topics:
+      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN:arn:aws:sns:ap-northeast-2:727646470302:passit-dev-ticket-events}
+  sqs:
+    queues:
+      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:https://sqs.ap-northeast-2.amazonaws.com/727646470302/passit-dev-ticket-deal-events}
