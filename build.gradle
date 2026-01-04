@@ -19,6 +19,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    mavenLocal() // For common:sns-lib published to local Maven repository
 }
 
 dependencies {
@@ -47,7 +48,8 @@ dependencies {
     testImplementation 'com.h2database:h2'
 
     // SNS Event Library
-    implementation project(':common:sns-lib')
+    // Use Maven local dependency (common-sns-lib is published to mavenLocal before build)
+    implementation 'com.company:sns-lib:1.0.0'
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.0.0'
 }
 
