@@ -17,8 +17,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
-
-
 server:
   port: 8082
 
@@ -36,6 +34,15 @@ logging:
     com.company.ticketservice: DEBUG
     org.springframework: INFO
 
-
 jwt:
   secret: MyVerySecretKeyForJWTTokenGenerationAndValidation123456789
+
+# AWS Configuration (기본값 - 프로파일별로 override 가능)
+aws:
+  region: ${AWS_REGION:ap-northeast-2}
+  sns:
+    topics:
+      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN:arn:aws:sns:ap-northeast-2:727646470302:passit-dev-ticket-events}
+  sqs:
+    queues:
+      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:https://sqs.ap-northeast-2.amazonaws.com/727646470302/passit-dev-ticket-deal-events}
