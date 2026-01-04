@@ -48,6 +48,9 @@ database:
 env:
   SPRING_PROFILES_ACTIVE: "production"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  AWS_REGION: "ap-northeast-2"
+  SNS_TICKET_EVENTS_TOPIC_ARN: "arn:aws:sns:ap-northeast-2:727646470302:passit-dev-ticket-events"
+  SQS_TICKET_DEAL_EVENTS_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/727646470302/passit-dev-ticket-deal-events"
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
