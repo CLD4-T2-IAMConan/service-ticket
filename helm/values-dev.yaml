@@ -5,6 +5,8 @@ image:
   tag: "sha-7b388fb"
 imagePullSecrets:
   - name: ghcr-pull-secret
+serviceAccount:
+  name: ticket-sa
 service:
   type: ClusterIP
   port: 80
@@ -48,9 +50,8 @@ database:
 env:
   SPRING_PROFILES_ACTIVE: "production"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
-  AWS_REGION: "ap-northeast-2"
-  SNS_TICKET_EVENTS_TOPIC_ARN: "arn:aws:sns:ap-northeast-2:061051233779:passit-dev-ticket-events"
-  SQS_TICKET_DEAL_EVENTS_QUEUE_URL: "https://sqs.ap-northeast-2.amazonaws.com/061051233779/passit-dev-ticket-deal-events"
+  # AWS_REGION, SNS_TICKET_EVENTS_TOPIC_ARN, SQS_TICKET_DEAL_EVENTS_QUEUE_URL는
+  # ticket-aws-config ConfigMap에서 자동으로 주입됨 (envFrom 사용)
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
