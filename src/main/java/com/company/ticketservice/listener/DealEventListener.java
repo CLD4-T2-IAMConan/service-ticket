@@ -15,7 +15,7 @@ public class DealEventListener {
     private final ObjectMapper objectMapper;
     // TODO: TicketService를 주입받아 실제 티켓 상태 업데이트 로직 구현
 
-    @SqsListener("${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:${aws.sqs.queues.ticket-deal-events:https://sqs.ap-northeast-2.amazonaws.com/727646470302/passit-dev-ticket-deal-events}}")
+    @SqsListener("${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:${aws.sqs.queues.ticket-deal-events:https://sqs.ap-northeast-2.amazonaws.com/061051233779/passit-dev-ticket-deal-events}}")
     public void handleDealEvent(String messageJson) {
         try {
             // SNS wraps SQS messages, so we need to extract the Message field
