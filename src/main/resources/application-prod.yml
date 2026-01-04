@@ -22,11 +22,12 @@ logging:
     org.springframework: WARN
 
 # AWS Configuration
+# 값은 Terraform이 생성한 ConfigMap(ticket-aws-config)에서 자동 주입됨
 aws:
-  region: ${AWS_REGION:ap-northeast-2}
+  region: ${AWS_REGION}
   sns:
     topics:
-      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN:arn:aws:sns:ap-northeast-2:061051233779:passit-dev-ticket-events}
+      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN}
   sqs:
     queues:
-      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:https://sqs.ap-northeast-2.amazonaws.com/061051233779/passit-dev-ticket-deal-events}
+      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL}

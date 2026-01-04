@@ -1,6 +1,6 @@
 apiVersion: v2
-name: ticketservice-service
-description: A Helm chart for MSA Ticketservice Service
+name: ticket-service
+description: A Helm chart for MSA Ticket Service
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
