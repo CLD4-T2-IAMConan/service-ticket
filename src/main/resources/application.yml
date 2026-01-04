@@ -37,12 +37,12 @@ logging:
 jwt:
   secret: MyVerySecretKeyForJWTTokenGenerationAndValidation123456789
 
-# AWS Configuration (기본값 - 프로파일별로 override 가능)
+# AWS Configuration (환경 변수로 제공되어야 함)
 aws:
   region: ${AWS_REGION:ap-northeast-2}
   sns:
     topics:
-      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN:arn:aws:sns:ap-northeast-2:061051233779:passit-dev-ticket-events}
+      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN}
   sqs:
     queues:
-      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:https://sqs.ap-northeast-2.amazonaws.com/061051233779/passit-dev-ticket-deal-events}
+      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL}
