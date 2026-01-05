@@ -50,7 +50,11 @@ readinessProbe:
     port: 8080
   initialDelaySeconds: 20
   periodSeconds: 5
+# Valkey 설정 (ElastiCache for Valkey)
 redis:
-  host: "passit-prod-valkey-ro.q2tpkl.ng.0001.apn2.cache.amazonaws.com:6379"
+  host: "passit-prod-valkey-ro.q2tpkl.ng.0001.apn2.cache.amazonaws.com"
+  port: 6379
+  password: ""
+  ssl: true
 s3:
-  bucket: "\e[33m╷\e[0m\e[0m\n\e[33m│\e[0m \e[0m\e[1m\e[33mWarning: \e[0m\e[0m\e[1mNo outputs found\e[0m\n\e[33m│\e[0m \e[0m\n\e[33m│\e[0m \e[0m\e[0mThe state file either has no outputs defined, or all the defined outputs\n\e[33m│\e[0m \e[0mare empty. Please define an output in your configuration with the `output`\n\e[33m│\e[0m \e[0mkeyword and run `terraform refresh` for it to become available. If you are\n\e[33m│\e[0m \e[0musing interpolation, please verify the interpolated value is not empty. You\n\e[33m│\e[0m \e[0mcan use the `terraform console` command to assist.\n\e[33m╵\e[0m\e[0m"
+  bucket: "passit-prod-ticket-images-bucket"  # TODO: 실제 S3 bucket 이름으로 변경 필요
