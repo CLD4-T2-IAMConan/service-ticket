@@ -76,3 +76,6 @@ redis:
   ssl: true
 s3:
   bucket: "passit-dev-ticket-images-bucket"
+
+  monitoring:
+    interval: 15s

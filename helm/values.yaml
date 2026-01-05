@@ -59,3 +59,8 @@ readinessProbe:
     port: 8080
   initialDelaySeconds: 20
   periodSeconds: 5
+
+monitoring:
+  enabled: true
+  path: /actuator/prometheus
+  interval: 15s
