@@ -2,7 +2,7 @@ replicaCount: 2
 image:
   repository: ghcr.io/cld4-t2-iamconan/service-ticket
   pullPolicy: Always
-  tag: "sha-93de07a"
+  tag: "sha-5a8f7e7"
 imagePullSecrets:
   - name: ghcr-pull-secret
 serviceAccount:
@@ -76,6 +76,5 @@ redis:
   ssl: true
 s3:
   bucket: "passit-dev-ticket-images-bucket"
-
   monitoring:
     interval: 15s
