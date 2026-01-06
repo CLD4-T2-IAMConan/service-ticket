@@ -75,10 +75,10 @@ jobs:
 
           git clone https://${MAIN_REPO_PAT}@github.com/CLD4-T2-IAMConan/Passit.git main-repo
           cd main-repo
-          
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
           # Update dev values
           git checkout develop || git checkout -b develop
           VALUES_DEV_FILE="service-ticket/helm/values-dev.yaml"
@@ -90,10 +90,14 @@ jobs:
               rm -f "${VALUES_DEV_FILE}.bak"
             fi
             git add "$VALUES_DEV_FILE"
-            git commit -m "chore: update ticket-service dev image tag to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
-            git push origin develop
+            if ! git diff --staged --quiet; then
+              git commit -m "chore: update ticket-service dev image tag to $IMAGE_TAG [skip ci]"
+              git push origin develop
+            else
+              echo "ℹ️  No changes to commit for dev values"
+            fi
           fi
-          
+
           # Update prod values (same SHA tag as dev)
           git checkout main || git checkout -b main
           VALUES_PROD_FILE="service-ticket/helm/values-prod.yaml"
@@ -105,8 +109,12 @@ jobs:
               rm -f "${VALUES_PROD_FILE}.bak"
             fi
             git add "$VALUES_PROD_FILE"
-            git commit -m "chore: update ticket-service prod image tag to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
-            git push origin main
+            if ! git diff --staged --quiet; then
+              git commit -m "chore: update ticket-service prod image tag to $IMAGE_TAG [skip ci]"
+              git push origin main
+            else
+              echo "ℹ️  No changes to commit for prod values"
+            fi
           else
             echo "⚠️  Helm values file not found: $VALUES_PROD_FILE"
           fi
