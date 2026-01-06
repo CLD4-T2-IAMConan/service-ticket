@@ -66,55 +66,24 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Update Helm values in main repository
-        env:
-          MAIN_REPO_PAT: ${{ secrets.MAIN_REPO_PAT }}
+      - name: Update image tag
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           IMAGE_TAG="sha-${SHORT_SHA}"
 
-          git clone https://${MAIN_REPO_PAT}@github.com/CLD4-T2-IAMConan/Passit.git main-repo
-          cd main-repo
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
 
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          # Update image tag in values files
+          for file in helm/values-dev.yaml helm/values-prod.yaml; do
+            if [ -f "$file" ]; then
+              sed -i.bak "s|tag:.*|tag: \"$IMAGE_TAG\"|g" "$file"
+              rm -f "${file}.bak"
+              git add "$file"
+            fi
+          done
 
-          # Update dev values
-          git checkout develop || git checkout -b develop
-          VALUES_DEV_FILE="service-ticket/helm/values-dev.yaml"
-          if [ -f "$VALUES_DEV_FILE" ]; then
-            if command -v yq &> /dev/null; then
-              yq eval ".image.tag = \"$IMAGE_TAG\"" -i "$VALUES_DEV_FILE"
-            else
-              sed -i.bak "s|tag:.*|tag: \"$IMAGE_TAG\"|g" "$VALUES_DEV_FILE"
-              rm -f "${VALUES_DEV_FILE}.bak"
-            fi
-            git add "$VALUES_DEV_FILE"
-            if ! git diff --staged --quiet; then
-              git commit -m "chore: update ticket-service dev image tag to $IMAGE_TAG [skip ci]"
-              git push origin develop
-            else
-              echo "ℹ️  No changes to commit for dev values"
-            fi
-          fi
-
-          # Update prod values (same SHA tag as dev)
-          git checkout main || git checkout -b main
-          VALUES_PROD_FILE="service-ticket/helm/values-prod.yaml"
-          if [ -f "$VALUES_PROD_FILE" ]; then
-            if command -v yq &> /dev/null; then
-              yq eval ".image.tag = \"$IMAGE_TAG\"" -i "$VALUES_PROD_FILE"
-            else
-              sed -i.bak "s|tag:.*|tag: \"$IMAGE_TAG\"|g" "$VALUES_PROD_FILE"
-              rm -f "${VALUES_PROD_FILE}.bak"
-            fi
-            git add "$VALUES_PROD_FILE"
-            if ! git diff --staged --quiet; then
-              git commit -m "chore: update ticket-service prod image tag to $IMAGE_TAG [skip ci]"
-              git push origin main
-            else
-              echo "ℹ️  No changes to commit for prod values"
-            fi
-          else
-            echo "⚠️  Helm values file not found: $VALUES_PROD_FILE"
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update image tag to $IMAGE_TAG [skip ci]"
+            git push origin main
           fi
