@@ -47,6 +47,9 @@ database:
   password: passit_password
 env:
   SPRING_PROFILES_ACTIVE: "production"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  # AWS_REGION, SNS_TICKET_EVENTS_TOPIC_ARN, SQS_TICKET_DEAL_EVENTS_QUEUE_URL는
+  # ticket-aws-config ConfigMap에서 자동으로 주입됨 (envFrom 사용)
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
@@ -70,9 +73,8 @@ redis:
   password: ""
   ssl: true
 s3:
-  bucket: "passit-prod-ticket-images-bucket" # TODO: 실제 S3 bucket 이름으로 변경 필요
-
-monitoring:
-  interval: 30s
+  bucket: "passit-prod-ticket-images-bucket"
+  monitoring:
+    interval: 15s
 serviceAccount:
-  name: "ticket-sa"
+  name: ticket-sa
