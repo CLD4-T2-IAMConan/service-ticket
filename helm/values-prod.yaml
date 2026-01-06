@@ -1,8 +1,10 @@
 replicaCount: 2
 image:
-  repository: ticketservice-service
-  pullPolicy: IfNotPresent
+  repository: ghcr.io/cld4-t2-iamconan/service-ticket
+  pullPolicy: Always
   tag: "latest"
+imagePullSecrets:
+  - name: ghcr-pull-secret
 service:
   type: ClusterIP
   port: 80
@@ -57,7 +59,9 @@ redis:
   password: ""
   ssl: true
 s3:
-  bucket: "passit-prod-ticket-images-bucket"  # TODO: 실제 S3 bucket 이름으로 변경 필요
+  bucket: "passit-prod-ticket-images-bucket" # TODO: 실제 S3 bucket 이름으로 변경 필요
 
 monitoring:
   interval: 30s
+serviceAccount:
+  name: "ticket-sa"
