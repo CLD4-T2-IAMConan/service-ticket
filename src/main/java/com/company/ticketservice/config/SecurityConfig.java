@@ -40,6 +40,9 @@ public class SecurityConfig {
                         // Actuator health 엔드포인트 허용 (Kubernetes liveness/readiness probe)
                         .requestMatchers("/actuator/health/**").permitAll()
 
+                        // Prometheus 메트릭 엔드포인트 허용
+                        .requestMatchers("/actuator/prometheus").permitAll()
+
                         // 관리자용 시드 데이터 API (개발용) - 가장 먼저 체크
                         .requestMatchers("/api/admin/tickets/seed").permitAll()
 

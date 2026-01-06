@@ -9,6 +9,9 @@ service:
   type: ClusterIP
   port: 80
   targetPort: 8082
+monitoring:
+  enabled: true
+  interval: 15s
 ingress:
   enabled: true
   className: alb
@@ -74,7 +77,6 @@ redis:
   ssl: true
 s3:
   bucket: "passit-prod-ticket-images-bucket"
-  monitoring:
-    interval: 15s
+
 serviceAccount:
   name: ticket-sa
