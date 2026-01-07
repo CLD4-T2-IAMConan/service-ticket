@@ -1,0 +1,74 @@
+replicaCount: 1
+
+image:
+  repository: service-ticket
+  pullPolicy: Never  # kind에서는 로컬 이미지 사용
+  tag: "local"
+
+serviceAccount:
+  name: default
+
+service:
+  type: NodePort  # 로컬 접근을 위해 NodePort 사용
+  port: 80
+  targetPort: 8082
+  nodePort: 30082  # 외부 접근 포트
+
+monitoring:
+  enabled: false  # 로컬에서는 모니터링 비활성화
+  interval: 15s
+
+ingress:
+  enabled: false  # 로컬에서는 NodePort 사용
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+
+database:
+  enabled: true
+  host: mysql.passit.svc.cluster.local
+  port: 3306
+  name: passit_db
+  user: passit_user
+  password: passit_password
+
+env:
+  SPRING_PROFILES_ACTIVE: "local"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  # AWS 설정은 로컬에서 비활성화
+  AWS_REGION: "ap-northeast-2"
+  SNS_TICKET_EVENTS_TOPIC_ARN: ""
+  SQS_TICKET_DEAL_EVENTS_QUEUE_URL: ""
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8082
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8082
+  initialDelaySeconds: 50
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Redis 설정
+redis:
+  host: "redis.passit.svc.cluster.local"
+  port: 6379
+  password: ""
+  ssl: false

@@ -1,0 +1,45 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true  # SNS bean 중복 정의 허용
+
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.messaging.SqsAutoConfiguration  # 로컬에서는 SQS 비활성화
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:mysql.passit.svc.cluster.local}:${DB_PORT:3306}/${DB_NAME:passit_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${DB_USER:passit_user}
+    password: ${DB_PASSWORD:passit_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+logging:
+  level:
+    com.company.ticketservice: DEBUG
+    org.springframework: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# AWS Configuration - 로컬에서는 옵셔널하게 처리
+aws:
+  region: ${AWS_REGION:ap-northeast-2}
+  sns:
+    topics:
+      ticket-events: ${SNS_TICKET_EVENTS_TOPIC_ARN:}
+  sqs:
+    queues:
+      ticket-deal-events: ${SQS_TICKET_DEAL_EVENTS_QUEUE_URL:}
+
+# Redis Configuration
+redis:
+  host: ${REDIS_HOST:redis.passit.svc.cluster.local}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  ssl: false
