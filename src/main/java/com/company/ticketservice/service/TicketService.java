@@ -661,6 +661,9 @@ public class TicketService {
 
         TicketStatus oldStatus = ticket.getTicketStatus();
         ticket.setTicketStatus(newStatus);
+        
+        // 상태 변경 저장
+        Ticket savedTicket = ticketRepository.save(ticket);
 
         // 이벤트 발행: ticket.status.changed
         try {
@@ -669,7 +672,7 @@ public class TicketService {
                 "service-ticket",
                 Map.of(
                     "ticketId", ticketId,
-                    "ownerId", ticket.getOwnerId(),
+                    "ownerId", savedTicket.getOwnerId(),
                     "oldStatus", oldStatus.name(),
                     "newStatus", newStatus.name()
                 )
@@ -679,7 +682,7 @@ public class TicketService {
             // 이벤트 발행 실패는 상태 변경을 중단시키지 않음
         }
 
-        return TicketResponse.fromEntity(ticket);
+        return TicketResponse.fromEntity(savedTicket);
     }
 
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Profile("!local")  // 로컬 환경에서는 AWS SQS 리스너 비활성화
+@Profile("!local & !test")  // 로컬 및 테스트 환경에서는 AWS SQS 리스너 비활성화
 @RequiredArgsConstructor
 public class DealEventListener {
 
