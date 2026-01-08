@@ -1,4 +1,11 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true  # Bean 중복 정의 허용 (테스트 환경)
+
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.messaging.SqsAutoConfiguration  # 테스트에서는 SQS 비활성화
+
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
@@ -16,3 +23,16 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+
+jwt:
+  secret: MyVerySecretKeyForJWTTokenGenerationAndValidation123456789
+
+# AWS Configuration - 테스트 환경에서는 옵셔널
+aws:
+  region: ap-northeast-2
+  sns:
+    topics:
+      ticket-events: test-topic-arn
+  sqs:
+    queues:
+      ticket-deal-events: test-queue-url
