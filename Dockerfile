@@ -10,9 +10,9 @@ RUN gradle publishToMavenLocal --no-daemon
 
 # Build service-ticket
 WORKDIR /app
-COPY build.gradle ./
-COPY gradle gradle
-COPY src src
+COPY service-ticket/build.gradle ./
+COPY service-ticket/gradle gradle
+COPY service-ticket/src src
 # Docker 빌드 시에는 Maven local 의존성 사용 (settings.gradle에서 common:sns-lib 제외)
 RUN echo "rootProject.name = 'ticketservice-service'" > settings.gradle
 RUN gradle build --no-daemon -x test

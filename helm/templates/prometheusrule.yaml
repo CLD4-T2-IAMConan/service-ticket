@@ -1,0 +1,32 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "ticket-service.fullname" . }}-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: ticket-service.rules
+      rules:
+        - alert: TicketServiceHigh5xxErrorRate
+          expr: |
+            100 *
+            sum(rate(http_server_requests_seconds_count{
+              application="ticket-service",
+              status=~"5.."
+            }[1m]))
+            /
+            sum(rate(http_server_requests_seconds_count{
+              application="ticket-service"
+            }[1m]))
+            > 5
+          for: 1m
+          labels:
+            severity: critical
+            service: ticket-service
+          annotations:
+            summary: "Ticket Service 5xx error rate high"
+            description: "ticket-service 5xx error rate > 5% for 1 minute"
+  {{- end }}
