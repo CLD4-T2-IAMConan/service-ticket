@@ -2,7 +2,7 @@ replicaCount: 2
 image:
   repository: ghcr.io/cld4-t2-iamconan/service-ticket
   pullPolicy: Always
-  tag: "sha-cf25bb2"
+  tag: "sha-72c466f"
 imagePullSecrets:
   - name: ghcr-pull-secret
 service:
@@ -11,7 +11,6 @@ service:
   targetPort: 8082
 monitoring:
   enabled: true
-  path: /actuator/prometheus
   interval: 15s
 ingress:
   enabled: true
@@ -29,7 +28,6 @@ ingress:
     - paths:
         - path: /api/tickets
           pathType: Prefix
-      host: ticket-service.passit.com
   tls: []
 resources:
   limits:
@@ -45,7 +43,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 database:
   enabled: true
-  host: "passit-prod-aurora-cluster.cluster-crkykwekkr0w.ap-northeast-2.rds.amazonaws.com"
+  host: "passit-prod-aurora-cluster.cluster-cnqmcq6uwqa3.ap-northeast-2.rds.amazonaws.com"
   port: 3306
   name: passit_db
   user: passit_user
@@ -59,7 +57,7 @@ livenessProbe:
   httpGet:
     path: /actuator/health/liveness
     port: 8082
-  initialDelaySeconds: 180
+  initialDelaySeconds: 60
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 3
@@ -67,22 +65,18 @@ readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8082
-  initialDelaySeconds: 120
+  initialDelaySeconds: 50
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
 # Valkey 설정 (ElastiCache for Valkey)
 redis:
-  host: "passit-prod-valkey.ri85pe.ng.0001.apn2.cache.amazonaws.com"
+  host: "passit-prod-valkey-ro.q2tpkl.ng.0001.apn2.cache.amazonaws.com"
   port: 6379
   password: ""
   ssl: true
 s3:
-  bucket: "passit-prod-uploads"
-# ServiceAccount는 Terraform IRSA 모듈이 생성 (ticket-sa)
-# Helm에서는 생성하지 않고 기존 것을 사용
+  bucket: "passit-prod-ticket-images-bucket"
+
 serviceAccount:
-  create: false
-  name: ticket-sa # Terraform이 생성한 ServiceAccount 사용
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::061051233779:role/passit-ticket-prod-irsa
+  name: ticket-sa

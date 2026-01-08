@@ -8,7 +8,7 @@ imagePullSecrets:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8080
+  targetPort: 8082
 ingress:
   enabled: true
   className: "alb"
@@ -41,32 +41,38 @@ autoscaling:
 database:
   enabled: true
   host: passit-prod-aurora-cluster.cluster-ro-c1ky2k6y6s3s.ap-northeast-1.rds.amazonaws.com
-  port: 5432
-  name: ticketservice_db
-  user: postgres
-  password: postgres
+  port: 3306
+  name: passit_db
+  user: passit_user
+  password: passit_password
 env:
-  SPRING_PROFILES_ACTIVE: "production"
+  SPRING_PROFILES_ACTIVE: "prod"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
-    port: 8080
-  initialDelaySeconds: 30
+    port: 8082
+  initialDelaySeconds: 180
   periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
-    port: 8080
-  initialDelaySeconds: 20
+    port: 8082
+  initialDelaySeconds: 120
   periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
 monitoring:
   enabled: true
   path: /actuator/prometheus
   interval: 15s
+# Valkey 설정 (ElastiCache for Valkey)
 redis:
   host: passit-dr-valkey.kqxlkn.ng.0001.apne1.cache.amazonaws.com
   port: 6379
-  password: "" # ElastiCache 비밀번호가 있는 경우 설정
+  password: ""
   ssl: true
 s3:
   bucket: passit-dr-ticket-images-bucket
