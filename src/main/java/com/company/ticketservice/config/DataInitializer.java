@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-@Component
+//@Component  // Disabled to prevent startup issues in production
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
