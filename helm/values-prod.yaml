@@ -1,5 +1,5 @@
 # Override resource names to avoid duplication
-fullnameOverride: ticket-service
+fullnameOverride: ticket-service-prod
 
 replicaCount: 2
 image:

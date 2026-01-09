@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ticket-service.fullname" . }}
+  name: {{ include "service-ticket.fullname" . }}
   labels:
-    {{- include "ticket-service.labels" . | nindent 4 }}
+    {{- include "service-ticket.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "ticket-service.selectorLabels" . | nindent 6 }}
+      {{- include "service-ticket.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "ticket-service.selectorLabels" . | nindent 8 }}
+        {{- include "service-ticket.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | default "ticket-sa" }}
       {{- with .Values.imagePullSecrets }}
@@ -39,33 +39,33 @@ spec:
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: {{ include "ticket-service.fullname" . }}-secret
+              name: {{ include "service-ticket.fullname" . }}-secret
               key: db-user
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ include "ticket-service.fullname" . }}-secret
+              name: {{ include "service-ticket.fullname" . }}-secret
               key: db-password
         {{- if .Values.redis }}
         - name: REDIS_HOST
           valueFrom:
             configMapKeyRef:
-              name: {{ include "ticket-service.fullname" . }}-config
+              name: {{ include "service-ticket.fullname" . }}-config
               key: redis.host
         - name: REDIS_PORT
           valueFrom:
             configMapKeyRef:
-              name: {{ include "ticket-service.fullname" . }}-config
+              name: {{ include "service-ticket.fullname" . }}-config
               key: redis.port
         - name: REDIS_SSL
           valueFrom:
             configMapKeyRef:
-              name: {{ include "ticket-service.fullname" . }}-config
+              name: {{ include "service-ticket.fullname" . }}-config
               key: redis.ssl
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ include "ticket-service.fullname" . }}-secret
+              name: {{ include "service-ticket.fullname" . }}-secret
               key: redis-password
         {{- end }}
         {{- range $key, $value := .Values.env }}
