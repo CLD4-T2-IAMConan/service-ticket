@@ -76,3 +76,7 @@ redis:
   ssl: true
 s3:
   bucket: passit-dr-ticket-images-bucket
+serviceAccount:
+  create: true
+  name: "" # 비워두더라도 객체는 존재해야 함
+  annotations: {}
