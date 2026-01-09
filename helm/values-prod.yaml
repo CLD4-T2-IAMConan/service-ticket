@@ -1,3 +1,6 @@
+# Override resource names to avoid duplication
+fullnameOverride: ticket-service
+
 replicaCount: 2
 image:
   repository: ghcr.io/cld4-t2-iamconan/service-ticket
@@ -47,9 +50,9 @@ database:
   enabled: true
   host: "passit-prod-aurora-cluster.cluster-crkykwekkr0w.ap-northeast-2.rds.amazonaws.com"
   port: 3306
-  name: passit_db
-  user: passit_user
-  password: passit_password
+  name: passit
+  user: admin
+  password: PassitDevPassword123!
 env:
   SPRING_PROFILES_ACTIVE: "prod"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"

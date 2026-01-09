@@ -1,3 +1,6 @@
+# Override resource names to avoid duplication
+fullnameOverride: ticket-service
+
 replicaCount: 2
 image:
   repository: ghcr.io/cld4-t2-iamconan/service-ticket
@@ -79,4 +82,3 @@ redis:
   ssl: true
 s3:
   bucket: "passit-dev-ticket-images-bucket"
-

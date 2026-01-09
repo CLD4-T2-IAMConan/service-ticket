@@ -13,6 +13,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
 
+  cloud:
+    aws:
+      sqs:
+        enabled: false
+        listener:
+          auto-startup: false
+
 server:
   port: 8082
 
@@ -25,14 +32,6 @@ management:
   health:
     sqs:
       enabled: false
-
-spring:
-  cloud:
-    aws:
-      sqs:
-        enabled: false
-        listener:
-          auto-startup: false
 
 # AWS Configuration
 # 값은 Terraform이 생성한 ConfigMap(ticket-aws-config)에서 자동 주입됨
