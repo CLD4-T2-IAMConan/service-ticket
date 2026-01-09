@@ -1,8 +1,11 @@
+# Override resource names to avoid duplication
+fullnameOverride: ticket-service
+
 replicaCount: 2
 image:
   repository: ghcr.io/cld4-t2-iamconan/service-ticket
   pullPolicy: Always
-  tag: "sha-3ba253f"
+  tag: "sha-c204f6c"
 imagePullSecrets:
   - name: ghcr-pull-secret
 serviceAccount:
@@ -79,4 +82,3 @@ redis:
   ssl: true
 s3:
   bucket: "passit-dev-ticket-images-bucket"
-
